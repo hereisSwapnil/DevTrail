@@ -2,7 +2,7 @@ import { useState, useMemo, useRef } from 'react';
 import { usePlaylist } from '@/context/PlaylistContext';
 import { PlaylistCard } from '@/components/PlaylistCard';
 import { PlaylistDetail } from '@/components/PlaylistDetail';
-import { Search, Plus, Download, Upload, LayoutGrid } from 'lucide-react';
+import { Search, Plus, Download, Upload, LayoutGrid, Link, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -13,14 +13,17 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { fetchUrlMetadata } from '@/lib/url-fetcher';
 
 export default function Dashboard() {
-  const { playlists, addPlaylist, exportData, importData, getPlaylistStats } = usePlaylist();
+  const { playlists, addPlaylist, addVideo, exportData, importData, getPlaylistStats } = usePlaylist();
   const [search, setSearch] = useState('');
   const [openPlaylistId, setOpenPlaylistId] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newDesc, setNewDesc] = useState('');
+  const [newPlaylistUrl, setNewPlaylistUrl] = useState('');
+  const [isFetchingPlaylist, setIsFetchingPlaylist] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const filtered = useMemo(() => {
@@ -33,11 +36,36 @@ export default function Dashboard() {
   const totalCompleted = playlists.reduce((sum, p) => sum + getPlaylistStats(p).completed, 0);
   const overallPercent = totalVideos === 0 ? 0 : Math.round((totalCompleted / totalVideos) * 100);
 
+  const handleFetchPlaylistUrl = async () => {
+    if (!newPlaylistUrl.trim()) return;
+    setIsFetchingPlaylist(true);
+    const result = await fetchUrlMetadata(newPlaylistUrl.trim());
+    setIsFetchingPlaylist(false);
+
+    if (result.type === 'playlist') {
+      const pl = addPlaylist(result.data.title, result.data.author ? `By ${result.data.author}` : undefined);
+      result.data.videos.forEach(v => {
+        addVideo(pl.id, { title: v.title, thumbnail: v.thumbnail, duration: v.duration });
+      });
+      setNewPlaylistUrl('');
+      setNewTitle('');
+      setNewDesc('');
+      setAddOpen(false);
+      toast.success(`Created playlist with ${result.data.videos.length} videos`);
+    } else if (result.type === 'video') {
+      setNewTitle(result.data.title);
+      toast.info('This is a single video URL. Title auto-filled.');
+    } else {
+      toast.error(result.message);
+    }
+  };
+
   const handleAdd = () => {
     if (!newTitle.trim()) return;
     addPlaylist(newTitle.trim(), newDesc.trim() || undefined);
     setNewTitle('');
     setNewDesc('');
+    setNewPlaylistUrl('');
     setAddOpen(false);
     toast.success('Playlist created');
   };
@@ -140,6 +168,17 @@ export default function Dashboard() {
                 <DialogTitle className="font-mono">New Playlist</DialogTitle>
               </DialogHeader>
               <div className="space-y-3">
+                <div className="flex gap-2">
+                  <Input placeholder="Paste YouTube playlist URL" value={newPlaylistUrl} onChange={e => setNewPlaylistUrl(e.target.value)} className="flex-1" />
+                  <Button variant="outline" size="sm" onClick={handleFetchPlaylistUrl} disabled={isFetchingPlaylist || !newPlaylistUrl.trim()} className="shrink-0">
+                    {isFetchingPlaylist ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <div className="relative flex items-center">
+                  <div className="flex-1 border-t border-border" />
+                  <span className="px-2 text-[10px] text-muted-foreground uppercase">or manually</span>
+                  <div className="flex-1 border-t border-border" />
+                </div>
                 <Input placeholder="Playlist title *" value={newTitle} onChange={e => setNewTitle(e.target.value)} />
                 <Input placeholder="Description (optional)" value={newDesc} onChange={e => setNewDesc(e.target.value)} />
                 <Button onClick={handleAdd} disabled={!newTitle.trim()} className="w-full">Create Playlist</Button>
