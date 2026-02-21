@@ -194,12 +194,30 @@ export function PlaylistDetail({ playlist, onBack }: PlaylistDetailProps) {
               {statusIcon(video.status)}
             </button>
             {video.thumbnail && (
-              <img src={video.thumbnail} alt="" className="h-9 w-16 object-cover rounded shrink-0" />
+              video.url ? (
+                <a href={video.url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="shrink-0" aria-label={`Open ${video.title} in new tab`}>
+                  <img src={video.thumbnail} alt={`Thumbnail for ${video.title}`} className="h-9 w-16 object-cover rounded hover:opacity-80 transition-opacity" />
+                </a>
+              ) : (
+                <img src={video.thumbnail} alt={`Thumbnail for ${video.title}`} className="h-9 w-16 object-cover rounded shrink-0" />
+              )
             )}
             <div className="flex-1 min-w-0">
-              <span className={`text-sm ${video.status === 'completed' ? 'line-through text-muted-foreground' : 'text-card-foreground'}`}>
-                {video.title}
-              </span>
+              {video.url ? (
+                <a
+                  href={video.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={e => e.stopPropagation()}
+                  className={`text-sm hover:text-primary hover:underline transition-colors ${video.status === 'completed' ? 'line-through text-muted-foreground' : 'text-card-foreground'}`}
+                >
+                  {video.title}
+                </a>
+              ) : (
+                <span className={`text-sm ${video.status === 'completed' ? 'line-through text-muted-foreground' : 'text-card-foreground'}`}>
+                  {video.title}
+                </span>
+              )}
               <div className="flex items-center gap-2 mt-0.5">
                 {video.duration && <span className="text-[10px] text-muted-foreground font-mono">{video.duration}</span>}
                 {video.completedAt && (
@@ -210,7 +228,7 @@ export function PlaylistDetail({ playlist, onBack }: PlaylistDetailProps) {
               </div>
             </div>
             {video.url && (
-              <a href={video.url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="text-muted-foreground hover:text-primary transition-colors">
+              <a href={video.url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="shrink-0 text-muted-foreground hover:text-primary transition-colors opacity-0 group-hover:opacity-100">
                 <ExternalLink className="h-3.5 w-3.5" />
               </a>
             )}
