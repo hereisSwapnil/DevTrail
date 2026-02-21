@@ -58,7 +58,66 @@ async function fetchYouTubeVideo(url: string): Promise<VideoMetadata | null> {
 
 async function fetchYouTubePlaylist(playlistId: string): Promise<PlaylistMetadata | null> {
   try {
-    // Fetch playlist RSS feed for video list
+    // Fetch the actual playlist page to get all videos (RSS is limited to 15)
+    const playlistUrl = `https://www.youtube.com/playlist?list=${playlistId}`;
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(playlistUrl)}`;
+    const res = await fetch(proxyUrl);
+    if (!res.ok) return fallbackToRss(playlistId);
+    const html = await res.text();
+
+    // Extract ytInitialData JSON from the page
+    const dataMatch = html.match(/var\s+ytInitialData\s*=\s*(\{.+?\});\s*<\/script>/s);
+    if (!dataMatch) return fallbackToRss(playlistId);
+
+    const data = JSON.parse(dataMatch[1]);
+    
+    // Navigate the data structure to find playlist info
+    const sidebar = data?.sidebar?.playlistSidebarRenderer?.items;
+    const primaryInfo = sidebar?.[0]?.playlistSidebarPrimaryInfoRenderer;
+    const playlistTitle = primaryInfo?.title?.runs?.[0]?.text || 'YouTube Playlist';
+    
+    const secondaryInfo = sidebar?.[1]?.playlistSidebarSecondaryInfoRenderer;
+    const authorName = secondaryInfo?.videoOwner?.videoOwnerRenderer?.title?.runs?.[0]?.text;
+
+    // Extract videos from playlist contents
+    const tabs = data?.contents?.twoColumnBrowseResultsRenderer?.tabs;
+    const tabContent = tabs?.[0]?.tabRenderer?.content;
+    const sectionList = tabContent?.sectionListRenderer?.contents;
+    const itemSection = sectionList?.[0]?.itemSectionRenderer?.contents;
+    const playlistItems = itemSection?.[0]?.playlistVideoListRenderer?.contents || [];
+
+    const videos: VideoMetadata[] = [];
+    for (const item of playlistItems) {
+      const renderer = item?.playlistVideoRenderer;
+      if (!renderer) continue;
+      const videoId = renderer.videoId;
+      const title = renderer.title?.runs?.[0]?.text || renderer.title?.simpleText || '';
+      const duration = renderer.lengthText?.simpleText;
+      const thumbnail = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : undefined;
+      
+      videos.push({
+        title,
+        thumbnail,
+        duration,
+        provider: 'YouTube',
+      });
+    }
+
+    if (videos.length === 0) return fallbackToRss(playlistId);
+
+    return {
+      title: playlistTitle,
+      author: authorName,
+      videos,
+    };
+  } catch (e) {
+    console.error('Failed to fetch YouTube playlist page, trying RSS fallback:', e);
+    return fallbackToRss(playlistId);
+  }
+}
+
+async function fallbackToRss(playlistId: string): Promise<PlaylistMetadata | null> {
+  try {
     const rssUrl = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`;
     const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`;
     const res = await fetch(proxyUrl);
@@ -94,7 +153,7 @@ async function fetchYouTubePlaylist(playlistId: string): Promise<PlaylistMetadat
       videos,
     };
   } catch (e) {
-    console.error('Failed to fetch YouTube playlist:', e);
+    console.error('Failed to fetch YouTube playlist RSS:', e);
     return null;
   }
 }
