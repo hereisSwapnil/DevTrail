@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { usePlaylist } from '@/context/PlaylistContext';
 import { Playlist, Video, VideoStatus } from '@/types/playlist';
-import { ArrowLeft, Plus, CheckCircle2, Circle, Clock, ExternalLink, Trash2, GripVertical } from 'lucide-react';
+import { ArrowLeft, Plus, CheckCircle2, Circle, Clock, ExternalLink, Trash2, Link, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
@@ -12,6 +12,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { fetchUrlMetadata } from '@/lib/url-fetcher';
+import { toast } from 'sonner';
 
 interface PlaylistDetailProps {
   playlist: Playlist;
@@ -35,6 +37,8 @@ export function PlaylistDetail({ playlist, onBack }: PlaylistDetailProps) {
   const [newTitle, setNewTitle] = useState('');
   const [newUrl, setNewUrl] = useState('');
   const [newDuration, setNewDuration] = useState('');
+  const [isFetching, setIsFetching] = useState(false);
+  const [fetchedThumbnail, setFetchedThumbnail] = useState('');
 
   const sortedVideos = [...playlist.videos].sort((a, b) => {
     if (sortMode === 'status') return statusOrder[a.status] - statusOrder[b.status];
@@ -46,12 +50,37 @@ export function PlaylistDetail({ playlist, onBack }: PlaylistDetailProps) {
     return 0;
   });
 
+  const handleFetchUrl = async () => {
+    if (!newUrl.trim()) return;
+    setIsFetching(true);
+    const result = await fetchUrlMetadata(newUrl.trim());
+    setIsFetching(false);
+
+    if (result.type === 'video') {
+      setNewTitle(result.data.title);
+      setFetchedThumbnail(result.data.thumbnail || '');
+      if (result.data.duration) setNewDuration(result.data.duration);
+      toast.success('Video info fetched!');
+    } else if (result.type === 'playlist') {
+      // Add all videos from playlist at once
+      result.data.videos.forEach(v => {
+        addVideo(playlist.id, { title: v.title, url: undefined, thumbnail: v.thumbnail, duration: v.duration });
+      });
+      setNewUrl('');
+      setAddOpen(false);
+      toast.success(`Added ${result.data.videos.length} videos from playlist`);
+    } else {
+      toast.error(result.message);
+    }
+  };
+
   const handleAddVideo = () => {
     if (!newTitle.trim()) return;
-    addVideo(playlist.id, { title: newTitle.trim(), url: newUrl.trim() || undefined, duration: newDuration.trim() || undefined });
+    addVideo(playlist.id, { title: newTitle.trim(), url: newUrl.trim() || undefined, duration: newDuration.trim() || undefined, thumbnail: fetchedThumbnail || undefined });
     setNewTitle('');
     setNewUrl('');
     setNewDuration('');
+    setFetchedThumbnail('');
     setAddOpen(false);
   };
 
@@ -134,8 +163,16 @@ export function PlaylistDetail({ playlist, onBack }: PlaylistDetailProps) {
               <DialogTitle className="font-mono">Add Video</DialogTitle>
             </DialogHeader>
             <div className="space-y-3">
+              <div className="flex gap-2">
+                <Input placeholder="Paste YouTube/Vimeo URL" value={newUrl} onChange={e => setNewUrl(e.target.value)} className="flex-1" />
+                <Button variant="outline" size="sm" onClick={handleFetchUrl} disabled={isFetching || !newUrl.trim()} className="shrink-0">
+                  {isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link className="h-4 w-4" />}
+                </Button>
+              </div>
+              {fetchedThumbnail && (
+                <img src={fetchedThumbnail} alt="Thumbnail" className="w-full h-32 object-cover rounded-md" />
+              )}
               <Input placeholder="Video title *" value={newTitle} onChange={e => setNewTitle(e.target.value)} />
-              <Input placeholder="URL (optional)" value={newUrl} onChange={e => setNewUrl(e.target.value)} />
               <Input placeholder="Duration, e.g. 12:30 (optional)" value={newDuration} onChange={e => setNewDuration(e.target.value)} />
               <Button onClick={handleAddVideo} disabled={!newTitle.trim()} className="w-full">Add Video</Button>
             </div>
@@ -156,6 +193,9 @@ export function PlaylistDetail({ playlist, onBack }: PlaylistDetailProps) {
             <button onClick={() => toggleVideoStatus(playlist.id, video.id)} className="shrink-0 transition-transform hover:scale-110">
               {statusIcon(video.status)}
             </button>
+            {video.thumbnail && (
+              <img src={video.thumbnail} alt="" className="h-9 w-16 object-cover rounded shrink-0" />
+            )}
             <div className="flex-1 min-w-0">
               <span className={`text-sm ${video.status === 'completed' ? 'line-through text-muted-foreground' : 'text-card-foreground'}`}>
                 {video.title}
