@@ -61,10 +61,10 @@ export function PlaylistDetail({ playlist, onBack }: PlaylistDetailProps) {
       setFetchedThumbnail(result.data.thumbnail || '');
       if (result.data.duration) setNewDuration(result.data.duration);
       toast.success('Video info fetched!');
-    if (result.type === 'playlist') {
+    } else if (result.type === 'playlist') {
       // Add all videos from playlist at once
       result.data.videos.forEach(v => {
-        addVideo(playlist.id, { title: v.title, url: v.url, thumbnail: v.thumbnail, duration: v.duration });
+        addVideo(playlist.id, { title: v.title, url: undefined, thumbnail: v.thumbnail, duration: v.duration });
       });
       setNewUrl('');
       setAddOpen(false);
@@ -187,29 +187,20 @@ export function PlaylistDetail({ playlist, onBack }: PlaylistDetailProps) {
         {sortedVideos.map((video, i) => (
           <div
             key={video.id}
-            className={`group flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-secondary/50 transition-colors animate-slide-in ${video.url ? 'cursor-pointer' : ''}`}
+            className="group flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-secondary/50 transition-colors animate-slide-in"
             style={{ animationDelay: `${i * 30}ms` }}
-            onClick={() => {
-              if (video.url) window.open(video.url, '_blank', 'noopener,noreferrer');
-            }}
           >
-            <button
-              onClick={(e) => { e.stopPropagation(); toggleVideoStatus(playlist.id, video.id); }}
-              className="shrink-0 transition-transform hover:scale-110"
-            >
+            <button onClick={() => toggleVideoStatus(playlist.id, video.id)} className="shrink-0 transition-transform hover:scale-110">
               {statusIcon(video.status)}
             </button>
             {video.thumbnail && (
               <img src={video.thumbnail} alt="" className="h-9 w-16 object-cover rounded shrink-0" />
             )}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-muted-foreground font-mono shrink-0">{i + 1}.</span>
-                <span className={`text-sm truncate ${video.status === 'completed' ? 'line-through text-muted-foreground' : 'text-card-foreground'}`}>
-                  {video.title}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 mt-0.5 ml-5">
+              <span className={`text-sm ${video.status === 'completed' ? 'line-through text-muted-foreground' : 'text-card-foreground'}`}>
+                {video.title}
+              </span>
+              <div className="flex items-center gap-2 mt-0.5">
                 {video.duration && <span className="text-[10px] text-muted-foreground font-mono">{video.duration}</span>}
                 {video.completedAt && (
                   <span className="text-[10px] text-success/70 font-mono">
@@ -219,11 +210,13 @@ export function PlaylistDetail({ playlist, onBack }: PlaylistDetailProps) {
               </div>
             </div>
             {video.url && (
-              <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
+              <a href={video.url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="text-muted-foreground hover:text-primary transition-colors">
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
             )}
             <button
-              onClick={(e) => { e.stopPropagation(); deleteVideo(playlist.id, video.id); }}
-              className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all shrink-0"
+              onClick={() => deleteVideo(playlist.id, video.id)}
+              className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>

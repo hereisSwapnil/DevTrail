@@ -15,7 +15,6 @@ function parseIsoDuration(iso: string): string {
 
 export interface VideoMetadata {
   title: string;
-  url?: string;
   thumbnail?: string;
   description?: string;
   duration?: string;
@@ -124,7 +123,6 @@ async function fetchYouTubePlaylist(playlistId: string): Promise<PlaylistMetadat
         const videoId = item.contentDetails?.videoId || snippet?.resourceId?.videoId;
         videos.push({
           title: snippet?.title || '',
-          url: videoId ? `https://www.youtube.com/watch?v=${videoId}` : undefined,
           thumbnail: videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : snippet?.thumbnails?.high?.url,
           description: snippet?.description?.slice(0, 200),
           duration: videoId ? durationsMap[videoId] : undefined,
@@ -170,7 +168,6 @@ async function fallbackToRss(playlistId: string): Promise<PlaylistMetadata | nul
       
       videos.push({
         title: videoTitle,
-        url: videoId ? `https://www.youtube.com/watch?v=${videoId}` : undefined,
         thumbnail,
         description: description.slice(0, 200),
         provider: 'YouTube',

@@ -45,7 +45,7 @@ export default function Dashboard() {
     if (result.type === 'playlist') {
       const pl = addPlaylist(result.data.title, result.data.author ? `By ${result.data.author}` : undefined);
       result.data.videos.forEach(v => {
-        addVideo(pl.id, { title: v.title, url: v.url, thumbnail: v.thumbnail, duration: v.duration });
+        addVideo(pl.id, { title: v.title, thumbnail: v.thumbnail, duration: v.duration });
       });
       setNewPlaylistUrl('');
       setNewTitle('');
