@@ -3,7 +3,7 @@ import { usePlaylist } from '@/context/PlaylistContext';
 import { Playlist, Video, VideoStatus } from '@/types/playlist';
 import {
   ArrowLeft, Plus, CheckCircle2, Circle, Clock, Trash2, Link, Loader2,
-  ChevronRight, ChevronLeft, SkipForward, ListVideo, LayoutList, ExternalLink
+  ChevronRight, ChevronLeft, SkipForward, ListVideo, LayoutList, ExternalLink, Monitor
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,6 +39,7 @@ export function PlaylistDetail({ playlist, onBack }: PlaylistDetailProps) {
 
   const [sortMode, setSortMode] = useState<SortMode>('default');
   const [viewMode, setViewMode] = useState<ViewMode>(isSingleVideo && firstVideo?.url ? 'player' : 'list');
+  const [isTheaterMode, setIsTheaterMode] = useState(false);
   const [activeVideoId, setActiveVideoId] = useState<string | null>(isSingleVideo && firstVideo?.url ? firstVideo.id : null);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(playlist.title);
@@ -157,6 +158,15 @@ export function PlaylistDetail({ playlist, onBack }: PlaylistDetailProps) {
             <h2 className="font-mono font-bold text-base truncate">{playlist.title}</h2>
             <p className="text-xs text-muted-foreground">{completed}/{total} completed · {percent}%</p>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsTheaterMode(prev => !prev)}
+            className={`h-8 text-xs gap-1.5 shrink-0 transition-colors ${isTheaterMode ? 'bg-primary/10 text-primary hover:bg-primary/20' : ''}`}
+          >
+            <Monitor className="h-3.5 w-3.5" />
+            Theater{isTheaterMode ? ' (On)' : ''}
+          </Button>
           {!isSingleVideo && (
             <Button
               variant="ghost"
@@ -170,19 +180,29 @@ export function PlaylistDetail({ playlist, onBack }: PlaylistDetailProps) {
           )}
         </div>
 
-        <div className="flex gap-4 h-[calc(100vh-12rem)]">
+        <div className={isTheaterMode 
+          ? "grid grid-cols-1 lg:grid-cols-[1fr_18rem] grid-rows-[auto_1fr] gap-4 h-[calc(100vh-12rem)] overflow-y-auto pr-2 pb-2 h-auto" 
+          : "flex gap-4 h-[calc(100vh-12rem)] h-auto"
+        }>
           {/* ── Left: Player + Notes ── */}
-          <div className="flex-1 min-w-0 flex flex-col gap-3 overflow-y-auto pr-1">
-            {/* Player */}
-            <VideoPlayer
-              key={activeVideo.id}
-              url={activeVideo.url!}
-              title={activeVideo.title}
-              thumbnail={activeVideo.thumbnail}
-            />
+          <div className={isTheaterMode 
+            ? "contents" 
+            : "flex-1 min-w-0 flex flex-col gap-3 overflow-y-auto pr-1"
+          }>
+            {/* Player Wrapper */}
+            <div className={isTheaterMode ? "col-span-1 lg:col-span-2 w-full transition-all duration-300" : "w-full shrink-0"}>
+              <VideoPlayer
+                key={activeVideo.id}
+                url={activeVideo.url!}
+                title={activeVideo.title}
+                thumbnail={activeVideo.thumbnail}
+              />
+            </div>
 
-            {/* Video meta + actions */}
-            <div className="flex items-start justify-between gap-3">
+            {/* Meta and Notes Container */}
+            <div className={`flex flex-col gap-3 min-w-0 ${isTheaterMode ? 'pr-4' : ''}`}>
+              {/* Video meta + actions */}
+              <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-base leading-tight">{activeVideo.title}</h3>
                 {activeVideo.duration && (
@@ -244,10 +264,11 @@ export function PlaylistDetail({ playlist, onBack }: PlaylistDetailProps) {
               <span>← → navigate</span>
               <span>C = mark done</span>
             </div>
+            </div>
           </div>
 
           {/* ── Right: Video sidebar ── */}
-          <div className="w-72 shrink-0 flex flex-col overflow-hidden rounded-xl border border-border bg-card">
+          <div className={`${isTheaterMode ? 'w-full h-[500px]' : 'w-72 shrink-0 h-full'} flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-all duration-300`}>
             {/* Header */}
             <div className="px-3 py-3 border-b border-border flex items-center gap-2">
               <ListVideo className="h-4 w-4 text-muted-foreground" />
