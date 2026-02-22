@@ -88,8 +88,14 @@ export function PlaylistDetail({ playlist, onBack }: PlaylistDetailProps) {
 
   // Keyboard shortcuts
   useEffect(() => {
-    if (viewMode !== 'player') return;
     const handler = (e: KeyboardEvent) => {
+      // Global escape key to go back to dashboard
+      if (e.key === 'Escape') {
+        onBack();
+        return;
+      }
+      
+      if (viewMode !== 'player') return;
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.key === 'ArrowRight' || e.key === 'n') goToNext();
       if (e.key === 'ArrowLeft' || e.key === 'p') goToPrev();
@@ -97,19 +103,24 @@ export function PlaylistDetail({ playlist, onBack }: PlaylistDetailProps) {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [viewMode, goToNext, goToPrev, activeVideo, playlist.id, toggleVideoStatus]);
+  }, [viewMode, goToNext, goToPrev, activeVideo, playlist.id, toggleVideoStatus, onBack]);
 
-  const handleFetchUrl = async () => {
+  const handleAddVideoAutomatically = async () => {
     if (!newUrl.trim()) return;
     setIsFetching(true);
     const result = await fetchUrlMetadata(newUrl.trim());
     setIsFetching(false);
 
     if (result.type === 'video') {
-      setNewTitle(result.data.title);
-      setFetchedThumbnail(result.data.thumbnail || '');
-      if (result.data.duration) setNewDuration(result.data.duration);
-      toast.success('Video info fetched!');
+      addVideo(playlist.id, {
+        title: result.data.title,
+        url: newUrl.trim() || undefined,
+        duration: result.data.duration?.trim() || undefined,
+        thumbnail: result.data.thumbnail || undefined,
+      });
+      setNewUrl('');
+      setAddOpen(false);
+      toast.success('Video added successfully!');
     } else if (result.type === 'playlist') {
       result.data.videos.forEach(v => {
         addVideo(playlist.id, { title: v.title, url: v.url, thumbnail: v.thumbnail, duration: v.duration });
@@ -120,18 +131,6 @@ export function PlaylistDetail({ playlist, onBack }: PlaylistDetailProps) {
     } else {
       toast.error(result.message);
     }
-  };
-
-  const handleAddVideo = () => {
-    if (!newTitle.trim()) return;
-    addVideo(playlist.id, {
-      title: newTitle.trim(),
-      url: newUrl.trim() || undefined,
-      duration: newDuration.trim() || undefined,
-      thumbnail: fetchedThumbnail || undefined,
-    });
-    setNewTitle(''); setNewUrl(''); setNewDuration(''); setFetchedThumbnail('');
-    setAddOpen(false);
   };
 
   const handleSaveEdit = () => {
@@ -415,25 +414,26 @@ export function PlaylistDetail({ playlist, onBack }: PlaylistDetailProps) {
             <DialogHeader>
               <DialogTitle className="font-mono">Add Video</DialogTitle>
             </DialogHeader>
-            <div className="space-y-3">
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Paste YouTube/Vimeo URL"
-                  value={newUrl}
-                  onChange={e => setNewUrl(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleFetchUrl()}
-                  className="flex-1"
-                />
-                <Button variant="outline" size="sm" onClick={handleFetchUrl} disabled={isFetching || !newUrl.trim()} className="shrink-0">
-                  {isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link className="h-4 w-4" />}
-                </Button>
-              </div>
-              {fetchedThumbnail && (
-                <img src={fetchedThumbnail} alt="Thumbnail" className="w-full h-32 object-cover rounded-md" />
-              )}
-              <Input placeholder="Video title *" value={newTitle} onChange={e => setNewTitle(e.target.value)} />
-              <Input placeholder="Duration, e.g. 12:30 (optional)" value={newDuration} onChange={e => setNewDuration(e.target.value)} />
-              <Button onClick={handleAddVideo} disabled={!newTitle.trim()} className="w-full">Add Video</Button>
+            <div className="space-y-4 pt-2">
+              <Input
+                placeholder="Paste YouTube URL"
+                value={newUrl}
+                onChange={e => setNewUrl(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleAddVideoAutomatically()}
+                className="h-11"
+                autoFocus
+              />
+              <Button
+                onClick={handleAddVideoAutomatically}
+                disabled={isFetching || !newUrl.trim()}
+                className="w-full h-11 text-sm font-medium"
+              >
+                {isFetching ? (
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Fetching & Adding...</>
+                ) : (
+                  'Add Video automatically'
+                )}
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -483,15 +483,15 @@ export function PlaylistDetail({ playlist, onBack }: PlaylistDetailProps) {
             )}
 
             {/* Title + meta */}
-            <div className="flex-1 min-w-0">
-              <p className={`text-sm font-medium truncate transition-colors ${
+            <div className="flex-1 min-w-0 pr-2">
+              <p className={`text-base font-medium truncate transition-colors ${
                 video.status === 'completed'
                   ? 'line-through text-muted-foreground'
-                  : video.url ? 'group-hover:text-primary' : ''
+                  : video.url ? 'group-hover:text-primary text-foreground' : 'text-foreground'
               }`}>
                 {video.title}
               </p>
-              <div className="flex items-center gap-2 mt-0.5">
+              <div className="flex items-center gap-2 mt-1">
                 {video.duration && <span className="text-[10px] text-muted-foreground font-mono">{video.duration}</span>}
                 {video.status === 'in_progress' && <span className="text-[10px] text-warning font-mono">· in progress</span>}
                 {video.completedAt && (

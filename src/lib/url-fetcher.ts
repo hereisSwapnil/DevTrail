@@ -247,5 +247,5 @@ export async function fetchUrlMetadata(url: string): Promise<FetchResult> {
     return { type: 'error', message: 'Could not fetch video info' };
   }
 
-  return { type: 'error', message: 'Only YouTube and Vimeo URLs are supported for auto-fetch' };
+  return { type: 'error', message: 'Only YouTube URLs are supported for auto-fetch' };
 }

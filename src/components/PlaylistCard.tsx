@@ -24,7 +24,7 @@ export function PlaylistCard({ playlist, onOpen, index = 0 }: PlaylistCardProps)
 
   return (
     <div
-      className="group relative rounded-lg border border-border bg-card overflow-hidden transition-all hover:border-primary/30 hover:glow-primary cursor-pointer animate-scale-in"
+      className="group relative rounded-xl border border-border/50 bg-card overflow-hidden transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 cursor-pointer animate-scale-in"
       style={{ animationDelay: `${index * 60}ms` }}
       onClick={() => onOpen(playlist.id)}
     >
@@ -38,9 +38,9 @@ export function PlaylistCard({ playlist, onOpen, index = 0 }: PlaylistCardProps)
         </div>
       )}
       <div className="p-5">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-mono font-semibold text-card-foreground truncate text-sm">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1 min-w-0 pr-3">
+            <h3 className="font-semibold text-foreground truncate text-base transition-colors group-hover:text-primary">
               {playlist.title}
             </h3>
             {playlist.description && (

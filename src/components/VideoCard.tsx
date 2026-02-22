@@ -30,7 +30,7 @@ export function VideoCard({ playlist, index = 0, onOpen }: VideoCardProps) {
 
   return (
     <div
-      className={`group relative rounded-xl border border-border bg-card overflow-hidden transition-all hover:border-primary/40 hover:shadow-lg animate-scale-in ${video.url ? 'cursor-pointer' : ''}`}
+      className={`group relative rounded-xl border border-border/50 bg-card overflow-hidden transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 animate-scale-in ${video.url ? 'cursor-pointer' : ''}`}
       style={{ animationDelay: `${index * 60}ms` }}
       onClick={() => video.url && onOpen(playlist.id)}
     >
@@ -75,12 +75,12 @@ export function VideoCard({ playlist, index = 0, onOpen }: VideoCardProps) {
               ? <Clock className="h-4 w-4 text-warning" />
               : <Circle className="h-4 w-4 text-muted-foreground" />}
           </button>
-          <div className="flex-1 min-w-0">
-            <p className={`text-sm font-mono font-semibold leading-tight ${isCompleted ? 'line-through text-muted-foreground' : 'text-card-foreground group-hover:text-primary transition-colors'}`}>
+          <div className="flex-1 min-w-0 pr-1">
+            <p className={`text-base font-semibold leading-tight ${isCompleted ? 'line-through text-muted-foreground' : 'text-foreground group-hover:text-primary transition-colors'}`}>
               {playlist.title}
             </p>
             {!video.thumbnail && video.duration && (
-              <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{video.duration}</p>
+              <p className="text-[10px] text-muted-foreground font-mono mt-1">{video.duration}</p>
             )}
             {isCompleted && video.completedAt && (
               <p className="text-[10px] text-success/70 font-mono mt-0.5">
