@@ -3,7 +3,7 @@ import { usePlaylist } from '@/context/PlaylistContext';
 import { PlaylistCard } from '@/components/PlaylistCard';
 import { VideoCard } from '@/components/VideoCard';
 import { PlaylistDetail } from '@/components/PlaylistDetail';
-import { Search, Plus, Download, Upload, LayoutGrid, Link, Loader2, ListVideo, Video } from 'lucide-react';
+import { Search, Plus, Download, Upload, Link, Loader2, ListVideo, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -196,11 +196,11 @@ export default function Dashboard() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 animate-fade-in">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-              <LayoutGrid className="h-5 w-5 text-primary" />
-              Dev Track
+            <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5">
+              <img src="/logo.png" alt="DevTrail logo" className="h-8 w-8 rounded-lg" />
+              DevTrail
             </h1>
-            <p className="text-sm text-muted-foreground mt-1">Track your learning progress</p>
+            <p className="text-sm text-muted-foreground mt-1">Track your learning journey</p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={handleExport} className="text-xs">
@@ -319,7 +319,7 @@ export default function Dashboard() {
         {/* Empty state */}
         {isEmpty && (
           <div className="text-center py-20 animate-fade-in">
-            <LayoutGrid className="h-10 w-10 text-muted-foreground/30 mx-auto mb-4" />
+            <img src="/logo.png" alt="" className="h-12 w-12 rounded-xl mx-auto mb-4 opacity-30" />
             <p className="text-muted-foreground text-sm">
               {search ? 'No results match your search.' : 'Nothing here yet. Add a playlist or video to get started.'}
             </p>
