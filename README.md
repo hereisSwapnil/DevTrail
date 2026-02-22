@@ -1,70 +1,50 @@
-# Dev Track
+# DevTrail
 
-A developer-focused learning platform for tracking progress through video tutorials, courses, and playlists — with a built-in video player so you never have to leave the app.
+A developer-focused learning tracker for organising and tracking progress through video tutorials, courses, and playlists — with a built-in video player.
 
-## Features
+## 🚀 Features
 
-- **In-app video player** — click any video to open an embedded YouTube/Vimeo player directly inside the app. No new tabs.
-- **Split-panel learning view** — playlists open in a two-panel layout: embedded player on the left, scrollable video list on the right. Navigate videos without losing your place.
-- **Per-video notes** — jot down key ideas, timestamps, or questions for each video. Notes are saved automatically in your browser.
-- **Playlist tracking** — import a YouTube playlist URL to auto-populate all videos with titles, thumbnails, and durations.
-- **Single video tracking** — add individual YouTube or Vimeo videos. They open in the same full player view as playlists.
-- **Auto status tracking** — videos are automatically marked *In Progress* when opened and *Completed* when you click Mark Done.
-- **Sort & filter** — sort videos by status or completion date inside a playlist. Search across all playlists and videos from the dashboard.
-- **Keyboard shortcuts** — `←`/`→` to navigate between videos, `C` to mark the current video complete.
-- **Export / Import** — back up and restore all data as a JSON file.
+- **In-app video player** — watch YouTube/Vimeo videos without leaving the app.
+- **Split-panel view** — embedded player on the left, scrollable playlist on the right.
+- **Playlist import** — paste a YouTube playlist URL to auto-import all videos with titles, thumbnails, and durations.
+- **Single video tracking** — add individual YouTube or Vimeo videos to your dashboard.
+- **Per-video notes** — jot down ideas and timestamps per video, saved in your browser.
+- **Status tracking** — videos cycle through *Not Started*, *In Progress*, and *Completed*.
+- **Keyboard shortcuts** — `←`/`→` to navigate, `C` to mark complete.
+- **Export / Import** — backup and restore all data as JSON.
 
-## Tech stack
+## 🛠️ Tech Stack
 
-- [Vite](https://vitejs.dev/) + [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
-- [shadcn/ui](https://ui.shadcn.com/) component library
-- [Tailwind CSS](https://tailwindcss.com/) for styling
-- [Lucide React](https://lucide.dev/) icons
-- [Sonner](https://sonner.emilkowal.ski/) toasts
-- Data persisted in `localStorage` — no backend required
+- **Vite + React + TypeScript**
+- **shadcn/ui** — component library
+- **Tailwind CSS** — styling
+- **Lucide React** — icons
+- `localStorage` — no backend required
 
-## Getting started
+## 📋 Prerequisites
 
-```sh
-# 1. Clone the repository
-git clone https://github.com/<your-username>/dev-track.git
+- [Node.js](https://nodejs.org/)
+- [npm](https://www.npmjs.com/)
 
-# 2. Navigate to the project directory
-cd dev-track
+## 🔧 Installation
 
-# 3. Install dependencies
+```bash
+git clone https://github.com/hereisSwapnil/DevTrail.git
+cd DevTrail
 npm install
-
-# 4. Start the development server
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+Open [http://localhost:5173](http://localhost:5173)
 
-## Available scripts
+## 🤝 Contributing
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start the dev server with HMR |
-| `npm run build` | Production build |
-| `npm run preview` | Preview the production build locally |
-| `npm run lint` | Run ESLint |
-| `npm test` | Run Vitest unit tests |
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feature/NewFeature`)
+3. Commit (`git commit -m "Add NewFeature"`)
+4. Push (`git push origin feature/NewFeature`)
+5. Open a Pull Request
 
-## Usage
+## 📄 License
 
-### Watching a playlist
-1. Click **New → Playlist** and paste a YouTube playlist URL, or enter a title manually.
-2. Click the playlist card — videos load in the **split-panel view**.
-3. Click any video in the sidebar to start watching. The player is embedded directly in the page.
-4. Use **Prev / Next** buttons or `←`/`→` keys to move between videos.
-5. Click **Mark Done** (or press `C`) to mark the current video complete.
-
-### Watching a single video
-1. Click **New → Single Video** and paste a YouTube or Vimeo URL.
-2. Click the video card — the full-screen embedded player opens immediately.
-3. Take notes in the **My Notes** panel below the player.
-
-### Exporting and importing
-- **Export** downloads a JSON snapshot of all your data.
-- **Import** restores from a previously exported JSON file.
+MIT
