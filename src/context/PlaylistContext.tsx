@@ -5,7 +5,7 @@ const STORAGE_KEY = 'dev-playlist-data';
 
 interface PlaylistContextType {
   playlists: Playlist[];
-  addPlaylist: (title: string, description?: string) => Playlist;
+  addPlaylist: (title: string, description?: string, isSingleVideo?: boolean) => Playlist;
   updatePlaylist: (id: string, updates: Partial<Pick<Playlist, 'title' | 'description'>>) => void;
   deletePlaylist: (id: string) => void;
   addVideo: (playlistId: string, video: Omit<Video, 'id' | 'status' | 'createdAt'>) => void;
@@ -36,9 +36,9 @@ export function PlaylistProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(playlists));
   }, [playlists]);
 
-  const addPlaylist = useCallback((title: string, description?: string) => {
+  const addPlaylist = useCallback((title: string, description?: string, isSingleVideo?: boolean) => {
     const now = new Date().toISOString();
-    const playlist: Playlist = { id: generateId(), title, description, videos: [], createdAt: now, updatedAt: now };
+    const playlist: Playlist = { id: generateId(), title, description, videos: [], createdAt: now, updatedAt: now, ...(isSingleVideo ? { isSingleVideo: true } : {}) };
     setPlaylists(prev => [playlist, ...prev]);
     return playlist;
   }, []);
