@@ -12,6 +12,7 @@ interface PlaylistContextType {
   updateVideo: (playlistId: string, videoId: string, updates: Partial<Video>) => void;
   deleteVideo: (playlistId: string, videoId: string) => void;
   toggleVideoStatus: (playlistId: string, videoId: string) => void;
+  setVideoStatus: (playlistId: string, videoId: string, status: VideoStatus) => void;
   markPlaylistCompleted: (playlistId: string) => void;
   exportData: () => string;
   importData: (json: string) => boolean;
@@ -87,6 +88,20 @@ export function PlaylistProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
+  const setVideoStatus = useCallback((playlistId: string, videoId: string, status: VideoStatus) => {
+    setPlaylists(prev => prev.map(p => {
+      if (p.id !== playlistId) return p;
+      return {
+        ...p,
+        videos: p.videos.map(v => {
+          if (v.id !== videoId) return v;
+          return { ...v, status, completedAt: status === 'completed' ? (v.completedAt || new Date().toISOString()) : undefined };
+        }),
+        updatedAt: new Date().toISOString(),
+      };
+    }));
+  }, []);
+
   const markPlaylistCompleted = useCallback((playlistId: string) => {
     const now = new Date().toISOString();
     setPlaylists(prev => prev.map(p => p.id === playlistId ? {
@@ -121,7 +136,7 @@ export function PlaylistProvider({ children }: { children: React.ReactNode }) {
   return (
     <PlaylistContext.Provider value={{
       playlists, addPlaylist, updatePlaylist, deletePlaylist,
-      addVideo, updateVideo, deleteVideo, toggleVideoStatus,
+      addVideo, updateVideo, deleteVideo, toggleVideoStatus, setVideoStatus,
       markPlaylistCompleted, exportData, importData, getPlaylistStats,
     }}>
       {children}

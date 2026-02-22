@@ -76,7 +76,7 @@ export default function Dashboard() {
     if (result.type === 'playlist') {
       const pl = addPlaylist(result.data.title, result.data.author ? `By ${result.data.author}` : undefined);
       result.data.videos.forEach(v => {
-        addVideo(pl.id, { title: v.title, thumbnail: v.thumbnail, duration: v.duration });
+        addVideo(pl.id, { title: v.title, url: v.url, thumbnail: v.thumbnail, duration: v.duration });
       });
       resetPlaylistForm();
       setAddOpen(false);
@@ -354,7 +354,7 @@ export default function Dashboard() {
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {singleVideoEntries.map((p, i) => (
-                <VideoCard key={p.id} playlist={p} index={i} />
+                <VideoCard key={p.id} playlist={p} index={i} onOpen={setOpenPlaylistId} />
               ))}
             </div>
           </section>

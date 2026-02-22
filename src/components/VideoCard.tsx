@@ -1,14 +1,15 @@
 import { usePlaylist } from '@/context/PlaylistContext';
 import { Playlist } from '@/types/playlist';
-import { CheckCircle2, Circle, Clock, ExternalLink, Trash2 } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, Trash2, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface VideoCardProps {
   playlist: Playlist;
   index?: number;
+  onOpen: (id: string) => void;
 }
 
-export function VideoCard({ playlist, index = 0 }: VideoCardProps) {
+export function VideoCard({ playlist, index = 0, onOpen }: VideoCardProps) {
   const { toggleVideoStatus, deletePlaylist } = usePlaylist();
   const video = playlist.videos[0];
 
@@ -29,10 +30,12 @@ export function VideoCard({ playlist, index = 0 }: VideoCardProps) {
 
   return (
     <div
-      className="group relative rounded-lg border border-border bg-card overflow-hidden transition-all hover:border-primary/30 hover:glow-primary animate-scale-in"
+      className={`group relative rounded-xl border border-border bg-card overflow-hidden transition-all hover:border-primary/40 hover:shadow-lg animate-scale-in ${video.url ? 'cursor-pointer' : ''}`}
       style={{ animationDelay: `${index * 60}ms` }}
+      onClick={() => video.url && onOpen(playlist.id)}
     >
-      {video.thumbnail && (
+      {/* Thumbnail */}
+      {video.thumbnail ? (
         <div className="relative w-full h-32 overflow-hidden bg-secondary">
           <img
             src={video.thumbnail}
@@ -49,8 +52,15 @@ export function VideoCard({ playlist, index = 0 }: VideoCardProps) {
               <CheckCircle2 className="h-8 w-8 text-success/80" />
             </div>
           )}
+          {video.url && !isCompleted && (
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
+              <div className="w-12 h-12 rounded-full bg-primary/90 flex items-center justify-center shadow-xl">
+                <Play className="h-5 w-5 text-primary-foreground fill-primary-foreground ml-0.5" />
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      ) : null}
 
       <div className="p-4">
         <div className="flex items-start gap-2 mb-3">
@@ -66,20 +76,9 @@ export function VideoCard({ playlist, index = 0 }: VideoCardProps) {
               : <Circle className="h-4 w-4 text-muted-foreground" />}
           </button>
           <div className="flex-1 min-w-0">
-            {video.url ? (
-              <a
-                href={video.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`text-sm font-mono font-semibold hover:text-primary hover:underline transition-colors leading-tight ${isCompleted ? 'line-through text-muted-foreground' : 'text-card-foreground'}`}
-              >
-                {playlist.title}
-              </a>
-            ) : (
-              <span className={`text-sm font-mono font-semibold leading-tight ${isCompleted ? 'line-through text-muted-foreground' : 'text-card-foreground'}`}>
-                {playlist.title}
-              </span>
-            )}
+            <p className={`text-sm font-mono font-semibold leading-tight ${isCompleted ? 'line-through text-muted-foreground' : 'text-card-foreground group-hover:text-primary transition-colors'}`}>
+              {playlist.title}
+            </p>
             {!video.thumbnail && video.duration && (
               <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{video.duration}</p>
             )}
@@ -87,6 +86,9 @@ export function VideoCard({ playlist, index = 0 }: VideoCardProps) {
               <p className="text-[10px] text-success/70 font-mono mt-0.5">
                 ✓ {new Date(video.completedAt).toLocaleDateString()}
               </p>
+            )}
+            {isInProgress && (
+              <p className="text-[10px] text-warning font-mono mt-0.5">In progress</p>
             )}
           </div>
         </div>
@@ -100,27 +102,13 @@ export function VideoCard({ playlist, index = 0 }: VideoCardProps) {
           >
             {isCompleted ? 'Completed ✓' : 'Mark Complete'}
           </Button>
-          <div className="flex items-center gap-1">
-            {video.url && (
-              <a
-                href={video.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Open ${playlist.title} in new tab`}
-                className="p-1.5 rounded text-muted-foreground hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
-                onClick={e => e.stopPropagation()}
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-              </a>
-            )}
-            <button
-              onClick={handleDelete}
-              className="p-1.5 rounded text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
-              aria-label={`Delete ${playlist.title}`}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
-          </div>
+          <button
+            onClick={handleDelete}
+            className="p-1.5 rounded text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
+            aria-label={`Delete ${playlist.title}`}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
         </div>
       </div>
     </div>

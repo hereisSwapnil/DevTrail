@@ -1,17 +1,18 @@
 # Dev Track
 
-A developer-focused learning tracker that helps you organise and track your progress through video tutorials, courses, and playlists.
+A developer-focused learning platform for tracking progress through video tutorials, courses, and playlists — with a built-in video player so you never have to leave the app.
 
 ## Features
 
-- **Playlist tracking** — import a YouTube playlist URL to auto-populate all videos with titles, thumbnails, and durations. Track progress per playlist.
-- **Single video tracking** — add individual YouTube or Vimeo videos directly to your dashboard. Mark them as complete without leaving the main view.
-- **Thumbnail previews** — playlist and video cards show cover thumbnails fetched automatically from YouTube/Vimeo.
-- **Dashboard controls** — single videos expose mark-complete, open-in-new-tab, and delete actions directly on the card. Playlists open a detail view with sorting, bulk-complete, and per-video controls.
-- **Status tracking** — videos cycle through *not started*, *in progress*, and *completed* states.
+- **In-app video player** — click any video to open an embedded YouTube/Vimeo player directly inside the app. No new tabs.
+- **Split-panel learning view** — playlists open in a two-panel layout: embedded player on the left, scrollable video list on the right. Navigate videos without losing your place.
+- **Per-video notes** — jot down key ideas, timestamps, or questions for each video. Notes are saved automatically in your browser.
+- **Playlist tracking** — import a YouTube playlist URL to auto-populate all videos with titles, thumbnails, and durations.
+- **Single video tracking** — add individual YouTube or Vimeo videos. They open in the same full player view as playlists.
+- **Auto status tracking** — videos are automatically marked *In Progress* when opened and *Completed* when you click Mark Done.
 - **Sort & filter** — sort videos by status or completion date inside a playlist. Search across all playlists and videos from the dashboard.
+- **Keyboard shortcuts** — `←`/`→` to navigate between videos, `C` to mark the current video complete.
 - **Export / Import** — back up and restore all data as a JSON file.
-- **Smooth animations** — cards animate in with staggered scale-in transitions for a polished feel.
 
 ## Tech stack
 
@@ -52,17 +53,17 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ## Usage
 
-### Adding a playlist
-1. Click **New → Playlist**.
-2. Paste a YouTube playlist URL and click the fetch button to import all videos automatically, *or* enter a title manually.
-3. Click **Create Playlist** — the card appears on the dashboard with a progress bar.
-4. Click the card to open the detail view, where you can mark individual videos, sort, and add more.
+### Watching a playlist
+1. Click **New → Playlist** and paste a YouTube playlist URL, or enter a title manually.
+2. Click the playlist card — videos load in the **split-panel view**.
+3. Click any video in the sidebar to start watching. The player is embedded directly in the page.
+4. Use **Prev / Next** buttons or `←`/`→` keys to move between videos.
+5. Click **Mark Done** (or press `C`) to mark the current video complete.
 
-### Adding a single video
-1. Click **New → Single Video**.
-2. Paste a YouTube or Vimeo URL and click the fetch button to fill in the title, thumbnail, and duration.
-3. Click **Add Video** — the card appears in the *Single Videos* section of the dashboard.
-4. Use the **Mark Complete** button directly on the card. Click the link icon to open the video in a new tab.
+### Watching a single video
+1. Click **New → Single Video** and paste a YouTube or Vimeo URL.
+2. Click the video card — the full-screen embedded player opens immediately.
+3. Take notes in the **My Notes** panel below the player.
 
 ### Exporting and importing
 - **Export** downloads a JSON snapshot of all your data.

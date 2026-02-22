@@ -15,6 +15,7 @@ function parseIsoDuration(iso: string): string {
 
 export interface VideoMetadata {
   title: string;
+  url?: string;
   thumbnail?: string;
   description?: string;
   duration?: string;
@@ -121,8 +122,11 @@ async function fetchYouTubePlaylist(playlistId: string): Promise<PlaylistMetadat
       for (const item of data.items || []) {
         const snippet = item.snippet;
         const videoId = item.contentDetails?.videoId || snippet?.resourceId?.videoId;
+        // Skip deleted/private videos
+        if (!videoId || snippet?.title === 'Deleted video' || snippet?.title === 'Private video') continue;
         videos.push({
           title: snippet?.title || '',
+          url: videoId ? `https://www.youtube.com/watch?v=${videoId}` : undefined,
           thumbnail: videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : snippet?.thumbnails?.high?.url,
           description: snippet?.description?.slice(0, 200),
           duration: videoId ? durationsMap[videoId] : undefined,
@@ -150,14 +154,14 @@ async function fallbackToRss(playlistId: string): Promise<PlaylistMetadata | nul
     const res = await fetch(proxyUrl);
     if (!res.ok) return null;
     const text = await res.text();
-    
+
     const parser = new DOMParser();
     const xml = parser.parseFromString(text, 'text/xml');
-    
+
     const titleEl = xml.querySelector('feed > title');
     const authorEl = xml.querySelector('feed > author > name');
     const entries = xml.querySelectorAll('entry');
-    
+
     const videos: VideoMetadata[] = [];
     entries.forEach((entry) => {
       const videoTitle = entry.querySelector('title')?.textContent || '';
@@ -165,9 +169,10 @@ async function fallbackToRss(playlistId: string): Promise<PlaylistMetadata | nul
       const mediaGroup = entry.getElementsByTagName('media:group')[0];
       const description = mediaGroup?.getElementsByTagName('media:description')[0]?.textContent || '';
       const thumbnail = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : undefined;
-      
+
       videos.push({
         title: videoTitle,
+        url: videoId ? `https://www.youtube.com/watch?v=${videoId}` : undefined,
         thumbnail,
         description: description.slice(0, 200),
         provider: 'YouTube',
@@ -211,7 +216,7 @@ function formatDuration(seconds: number): string {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
-export type FetchResult = 
+export type FetchResult =
   | { type: 'video'; data: VideoMetadata }
   | { type: 'playlist'; data: PlaylistMetadata }
   | { type: 'error'; message: string };
