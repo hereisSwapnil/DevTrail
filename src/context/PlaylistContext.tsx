@@ -13,6 +13,7 @@ interface PlaylistContextType {
   deleteVideo: (playlistId: string, videoId: string) => void;
   toggleVideoStatus: (playlistId: string, videoId: string) => void;
   setVideoStatus: (playlistId: string, videoId: string, status: VideoStatus) => void;
+  updateVideoProgress: (playlistId: string, videoId: string, progress: number) => void;
   markPlaylistCompleted: (playlistId: string) => void;
   exportData: () => string;
   importData: (json: string) => boolean;
@@ -102,6 +103,21 @@ export function PlaylistProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
+  const updateVideoProgress = useCallback((playlistId: string, videoId: string, progress: number) => {
+    setPlaylists(prev => prev.map(p => {
+      if (p.id !== playlistId) return p;
+      return {
+        ...p,
+        videos: p.videos.map(v => {
+          if (v.id !== videoId) return v;
+          return { ...v, progress };
+        }),
+        // Don't update the playlist's updatedAt timestamp for every second of video progress 
+        // to prevent over-rendering issues up the tree just for playback tracking
+      };
+    }));
+  }, []);
+
   const markPlaylistCompleted = useCallback((playlistId: string) => {
     const now = new Date().toISOString();
     setPlaylists(prev => prev.map(p => p.id === playlistId ? {
@@ -137,7 +153,7 @@ export function PlaylistProvider({ children }: { children: React.ReactNode }) {
     <PlaylistContext.Provider value={{
       playlists, addPlaylist, updatePlaylist, deletePlaylist,
       addVideo, updateVideo, deleteVideo, toggleVideoStatus, setVideoStatus,
-      markPlaylistCompleted, exportData, importData, getPlaylistStats,
+      updateVideoProgress, markPlaylistCompleted, exportData, importData, getPlaylistStats,
     }}>
       {children}
     </PlaylistContext.Provider>

@@ -6,6 +6,7 @@ export interface Video {
   url?: string;
   thumbnail?: string;
   duration?: string;
+  progress?: number;
   status: VideoStatus;
   completedAt?: string;
   createdAt: string;

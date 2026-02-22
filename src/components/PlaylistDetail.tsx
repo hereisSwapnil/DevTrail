@@ -193,9 +193,8 @@ export function PlaylistDetail({ playlist, onBack }: PlaylistDetailProps) {
             <div className={isTheaterMode ? "col-span-1 lg:col-span-2 w-full transition-all duration-300" : "w-full shrink-0"}>
               <VideoPlayer
                 key={activeVideo.id}
-                url={activeVideo.url!}
-                title={activeVideo.title}
-                thumbnail={activeVideo.thumbnail}
+                playlistId={playlist.id}
+                video={activeVideo}
               />
             </div>
 
