@@ -5,13 +5,14 @@ const STORAGE_KEY = 'dev-playlist-data';
 
 interface PlaylistContextType {
   playlists: Playlist[];
-  addPlaylist: (title: string, description?: string) => Playlist;
+  addPlaylist: (title: string, description?: string, isSingleVideo?: boolean) => Playlist;
   updatePlaylist: (id: string, updates: Partial<Pick<Playlist, 'title' | 'description'>>) => void;
   deletePlaylist: (id: string) => void;
   addVideo: (playlistId: string, video: Omit<Video, 'id' | 'status' | 'createdAt'>) => void;
   updateVideo: (playlistId: string, videoId: string, updates: Partial<Video>) => void;
   deleteVideo: (playlistId: string, videoId: string) => void;
   toggleVideoStatus: (playlistId: string, videoId: string) => void;
+  setVideoStatus: (playlistId: string, videoId: string, status: VideoStatus) => void;
   markPlaylistCompleted: (playlistId: string) => void;
   exportData: () => string;
   importData: (json: string) => boolean;
@@ -36,9 +37,9 @@ export function PlaylistProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(playlists));
   }, [playlists]);
 
-  const addPlaylist = useCallback((title: string, description?: string) => {
+  const addPlaylist = useCallback((title: string, description?: string, isSingleVideo?: boolean) => {
     const now = new Date().toISOString();
-    const playlist: Playlist = { id: generateId(), title, description, videos: [], createdAt: now, updatedAt: now };
+    const playlist: Playlist = { id: generateId(), title, description, videos: [], createdAt: now, updatedAt: now, ...(isSingleVideo ? { isSingleVideo: true } : {}) };
     setPlaylists(prev => [playlist, ...prev]);
     return playlist;
   }, []);
@@ -87,6 +88,20 @@ export function PlaylistProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
+  const setVideoStatus = useCallback((playlistId: string, videoId: string, status: VideoStatus) => {
+    setPlaylists(prev => prev.map(p => {
+      if (p.id !== playlistId) return p;
+      return {
+        ...p,
+        videos: p.videos.map(v => {
+          if (v.id !== videoId) return v;
+          return { ...v, status, completedAt: status === 'completed' ? (v.completedAt || new Date().toISOString()) : undefined };
+        }),
+        updatedAt: new Date().toISOString(),
+      };
+    }));
+  }, []);
+
   const markPlaylistCompleted = useCallback((playlistId: string) => {
     const now = new Date().toISOString();
     setPlaylists(prev => prev.map(p => p.id === playlistId ? {
@@ -121,7 +136,7 @@ export function PlaylistProvider({ children }: { children: React.ReactNode }) {
   return (
     <PlaylistContext.Provider value={{
       playlists, addPlaylist, updatePlaylist, deletePlaylist,
-      addVideo, updateVideo, deleteVideo, toggleVideoStatus,
+      addVideo, updateVideo, deleteVideo, toggleVideoStatus, setVideoStatus,
       markPlaylistCompleted, exportData, importData, getPlaylistStats,
     }}>
       {children}

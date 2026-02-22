@@ -18,6 +18,7 @@ export interface Playlist {
   videos: Video[];
   createdAt: string;
   updatedAt: string;
+  isSingleVideo?: boolean;
 }
 
 export function generateId(): string {
