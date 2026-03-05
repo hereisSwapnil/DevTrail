@@ -9,11 +9,9 @@ A developer-focused learning tracker for organising and tracking progress throug
 
 ---
 
-## 🎬 Demo
+## 🎬 Quick Demo
 
-[![DevTrail Demo](https://img.youtube.com/vi/YOUR_VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
-
-> Click the thumbnail above to watch the product walkthrough.
+https://github.com/user-attachments/assets/201ac474-d78a-4af7-b85d-522d168542d2
 
 ---
 
